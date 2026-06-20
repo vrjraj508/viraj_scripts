@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyFlow</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark font-md" id="appBody">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-mark">SF</div>
+      <div class="profile-switcher" id="profileSwitcher">
+        <button class="active-profile" id="activeProfileBtn">
+          <span id="headerEmoji">🎯</span>
+          <span class="profile-name" id="headerProfileName">Loading…</span>
+          <span class="chevron">▾</span>
+        </button>
+        <div class="profile-dropdown hidden" id="profileDropdown">
+          <div class="profile-list" id="profileList"></div>
+          <div class="profile-actions-row">
+            <button id="btnNewProfile">+ New</button>
+            <button id="btnManageProfiles">⚙ Manage</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="live-time" id="liveClock">00:00:00 AM</div>
+      <div class="live-date" id="liveDate">Wed, 27 May 2026</div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="themeToggle" title="Toggle theme">🌙</button>
+      <button class="icon-btn" id="webModeBtn" title="Open in web mode">⛶</button>
+    </div>
+  </header>
+
+  <!-- ══ STATS BAR ══════════════════════════════════════════════════════════ -->
+  <div class="stats-bar">
+    <div class="stat-chip"><span>🔥</span><span class="stat-val" id="streakCount">0</span><span>streak</span></div>
+    <div class="stat-chip"><span>✅</span><span class="stat-val" id="todayDone">0</span><span>done</span></div>
+    <div class="stat-chip"><span>📋</span><span class="stat-val" id="todayTotal">0</span><span>tasks</span></div>
+    <div class="stat-chip"><span>📅</span><span class="stat-val" id="eventsToday">0</span><span>events</span></div>
+    <div class="pomo-chip" id="pomodoroChip">
+      <span id="pomoClock">25:00</span>
+      <button class="pomo-btn" id="pomoStart" title="Start Pomodoro">▶</button>
+    </div>
+  </div>
+
+  <!-- ══ NAV ════════════════════════════════════════════════════════════════ -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="calendar"><span class="ti">📅</span><span>Calendar</span></button>
+    <button class="tab-btn" data-tab="today"><span class="ti">✅</span><span>Today</span></button>
+    <button class="tab-btn" data-tab="goals"><span class="ti">🎯</span><span>Goals</span></button>
+    <button class="tab-btn" data-tab="domains"><span class="ti">📚</span><span>Domains</span></button>
+    <button class="tab-btn" data-tab="settings"><span class="ti">⚙️</span><span>Settings</span></button>
+  </nav>
+
+  <!-- ══ TAB CONTENT ════════════════════════════════════════════════════════ -->
+  <main class="tab-content">
+
+    <!-- CALENDAR TAB -->
+    <div class="tab-pane active" id="tab-calendar">
+      <div class="cal-toolbar">
+        <button class="icon-btn" id="calPrev">‹</button>
+        <div class="cal-month-title" id="calMonthTitle">May 2026</div>
+        <button class="icon-btn" id="calNext">›</button>
+        <button class="btn-today" id="calToday">Today</button>
+        <button class="btn-primary ml-auto" id="btnAddEvent">+ Event</button>
+      </div>
+      <div class="cal-weekdays">
+        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="day-detail" id="dayDetail">
+        <div class="day-detail-header">
+          <span id="dayDetailTitle">Select a day</span>
+          <button class="btn-xs btn-primary" id="btnAddEventDay">+ Add</button>
+        </div>
+        <div class="day-events-list" id="dayEventsList">
+          <div class="empty-mini">Click a date to see events</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODAY TAB -->
+    <div class="tab-pane" id="tab-today">
+      <div class="section-header">
+        <h2>Today's Tasks</h2>
+        <button class="btn-primary" id="btnAddTask">+ Task</button>
+      </div>
+      <div class="domain-pills" id="domainFilter">
+        <button class="pill active" data-domain="all">All</button>
+      </div>
+      <div class="task-list" id="taskList">
+        <div class="empty-state"><div>🎯</div><p>No tasks yet — add your first!</p></div>
+      </div>
+    </div>
+
+    <!-- GOALS TAB -->
+    <div class="tab-pane" id="tab-goals">
+      <div class="goals-tabs">
+        <button class="goal-tab active" data-goal="daily">Daily</button>
+        <button class="goal-tab" data-goal="weekly">Weekly</button>
+        <button class="goal-tab" data-goal="monthly">Monthly</button>
+        <button class="goal-tab" data-goal="quarterly">Quarterly</button>
+      </div>
+      <div class="section-header">
+        <h2 id="goalTypeTitle">Daily Goals</h2>
+        <button class="btn-primary" id="btnAddGoal">+ Goal</button>
+      </div>
+      <div class="goals-list" id="goalsList"></div>
+    </div>
+
+    <!-- DOMAINS TAB -->
+    <div class="tab-pane" id="tab-domains">
+      <div class="section-header">
+        <h2>Study Domains</h2>
+        <button class="btn-primary" id="btnAddDomain">+ Domain</button>
+      </div>
+      <div class="domains-grid" id="domainsGrid"></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-pane" id="tab-settings">
+      <h2 class="tab-title">Settings</h2>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Appearance</div>
+        <div class="setting-row">
+          <label>Font Size</label>
+          <div class="btn-group">
+            <button class="size-btn" data-size="sm">S</button>
+            <button class="size-btn active" data-size="md">M</button>
+            <button class="size-btn" data-size="lg">L</button>
+            <button class="size-btn" data-size="xl">XL</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Theme</label>
+          <div class="btn-group">
+            <button class="theme-btn active" data-theme="dark">🌙 Dark</button>
+            <button class="theme-btn" data-theme="light">☀️ Light</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Study</div>
+        <div class="setting-row">
+          <label>Daily Target</label>
+          <div class="slider-row">
+            <input type="range" id="dailyTarget" min="1" max="12" value="6" class="slider">
+            <span class="slider-val" id="dailyTargetVal">6h</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Pomodoro</label>
+          <div class="slider-row">
+            <input type="range" id="pomodoroLen" min="10" max="60" value="25" class="slider">
+            <span class="slider-val" id="pomodoroLenVal">25m</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Short Break</label>
+          <div class="slider-row">
+            <input type="range" id="shortBreak" min="3" max="15" value="5" class="slider">
+            <span class="slider-val" id="shortBreakVal">5m</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>Notifications</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="notifToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Data</div>
+        <div class="data-btns">
+          <button class="btn-secondary" id="btnExportAll">⬇ Export All</button>
+          <button class="btn-secondary" id="btnExportCurrent">⬇ Export Profile</button>
+          <button class="btn-secondary" id="btnImport">⬆ Import</button>
+          <input type="file" id="importFile" accept=".json" class="hidden">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Profiles</div>
+        <div id="profileManageList"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══ MODALS ════════════════════════════════════════════════════════════ -->
+
+  <!-- Event Modal -->
+  <div class="modal-overlay hidden" id="eventModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="eventModalTitle">Add Event</h3>
+        <button class="modal-close" id="closeEventModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="evTitle" placeholder="e.g. Solve Binary Search problems" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="evDesc" placeholder="Notes, links, approach…" class="form-input form-textarea"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Domain</label>
+            <select id="evDomain" class="form-input"></select>
+          </div>
+          <div class="form-group half">
+            <label>Type</label>
+            <select id="evType" class="form-input">
+              <option value="task">📋 Task</option>
+              <option value="goal">🎯 Goal</option>
+              <option value="reminder">⏰ Reminder</option>
+              <option value="session">📚 Study Session</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <div class="custom-date-picker" id="evDatePicker">
+            <button class="date-display" id="evDateDisplay">Select Date</button>
+            <input type="hidden" id="evDate">
+            <div class="mini-cal hidden" id="evMiniCal"></div>
+          </div>
+        </div>
+        <div class="form-row" id="evTimeRow">
+          <div class="form-group half">
+            <label>Start Time</label>
+            <div class="time-picker-wrap">
+              <select id="evStartHr" class="form-input time-sel"></select>
+              <span class="time-colon">:</span>
+              <select id="evStartMin" class="form-input time-sel"></select>
+              <select id="evStartAmPm" class="form-input time-ampm"></select>
+            </div>
+          </div>
+          <div class="form-group half">
+            <label>End Time</label>
+            <div class="time-picker-wrap">
+              <select id="evEndHr" class="form-input time-sel"></select>
+              <span class="time-colon">:</span>
+              <select id="evEndMin" class="form-input time-sel"></select>
+              <select id="evEndAmPm" class="form-input time-ampm"></select>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>All Day</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="evAllDay" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-group half">
+            <label>Priority</label>
+            <select id="evPriority" class="form-input">
+              <option value="P1">🔴 High</option>
+              <option value="P2" selected>🟡 Normal</option>
+              <option value="P3">🟢 Low</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelEventModal">Cancel</button>
+        <button class="btn-primary" id="saveEventModal">Save Event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Modal -->
+  <div class="modal-overlay hidden" id="taskModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="taskModalTitle">Add Task</h3>
+        <button class="modal-close" id="closeTaskModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="taskTitle" placeholder="e.g. Solve 3 Binary Search problems" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="taskDesc" placeholder="Notes, links, approach…" class="form-input form-textarea"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Domain</label>
+            <select id="taskDomain" class="form-input"></select>
+          </div>
+          <div class="form-group half">
+            <label>Priority</label>
+            <select id="taskPriority" class="form-input">
+              <option value="P1">🔴 High</option>
+              <option value="P2" selected>🟡 Normal</option>
+              <option value="P3">🟢 Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Est. Time (mins)</label>
+            <input type="number" id="taskEstTime" value="30" min="5" max="480" class="form-input">
+          </div>
+          <div class="form-group half">
+            <label>Goal Type</label>
+            <select id="taskGoalType" class="form-input">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <div class="custom-date-picker" id="taskDatePicker">
+            <button class="date-display" id="taskDateDisplay">Select Date (optional)</button>
+            <input type="hidden" id="taskDueDate">
+            <div class="mini-cal hidden" id="taskMiniCal"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Remind At</label>
+          <div class="form-row">
+            <div class="form-group half" style="margin:0">
+              <div class="custom-date-picker" id="notifyDatePicker">
+                <button class="date-display" id="notifyDateDisplay">Select Date</button>
+                <input type="hidden" id="notifyDate">
+                <div class="mini-cal hidden" id="notifyMiniCal"></div>
+              </div>
+            </div>
+            <div class="form-group half" style="margin:0">
+              <div class="time-picker-wrap">
+                <select id="notifyHr" class="form-input time-sel"></select>
+                <span class="time-colon">:</span>
+                <select id="notifyMin" class="form-input time-sel"></select>
+                <select id="notifyAmPm" class="form-input time-ampm"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelTaskModal">Cancel</button>
+        <button class="btn-primary" id="saveTaskModal">Save Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Goal Modal -->
+  <div class="modal-overlay hidden" id="goalModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add Goal</h3>
+        <button class="modal-close" id="closeGoalModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="goalTitle" placeholder="e.g. Solve 15 LeetCode problems" class="form-input">
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Domain</label>
+            <select id="goalDomain" class="form-input"></select>
+          </div>
+          <div class="form-group half">
+            <label>Target</label>
+            <input type="number" id="goalTarget" value="1" min="1" class="form-input">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Unit</label>
+            <input type="text" id="goalUnit" placeholder="tasks / problems / hours" value="tasks" class="form-input">
+          </div>
+          <div class="form-group half">
+            <label>Due Date</label>
+            <div class="custom-date-picker" id="goalDatePicker">
+              <button class="date-display" id="goalDateDisplay">Select Date</button>
+              <input type="hidden" id="goalDueDate">
+              <div class="mini-cal hidden" id="goalMiniCal"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelGoalModal">Cancel</button>
+        <button class="btn-primary" id="saveGoalModal">Save Goal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Domain Modal -->
+  <div class="modal-overlay hidden" id="domainModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="domainModalTitle">Add Domain</h3>
+        <button class="modal-close" id="closeDomainModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="domainName" placeholder="e.g. System Design" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Icon</label>
+          <div class="icon-picker" id="iconPicker"></div>
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-picker" id="colorPicker"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelDomainModal">Cancel</button>
+        <button class="btn-primary" id="saveDomainModal">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div class="modal-overlay hidden" id="profileModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="profileModalTitle">New Profile</h3>
+        <button class="modal-close" id="closeProfileModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="profileName" placeholder="e.g. Java SDE-2 Prep" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Emoji</label>
+          <div class="icon-picker" id="emojiPicker"></div>
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-picker" id="profileColorPicker"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelProfileModal">Cancel</button>
+        <button class="btn-primary" id="saveProfileModal">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-overlay hidden" id="importModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Import Data</h3>
+        <button class="modal-close" id="closeImportModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="info-text" id="importInfo">Choose how to import:</p>
+        <div class="import-options">
+          <label class="radio-option">
+            <input type="radio" name="importMode" value="merge" checked>
+            <div><strong>Merge</strong><span>Add as new profiles (safe)</span></div>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="importMode" value="overwrite">
+            <div><strong>Overwrite</strong><span>Replace all data (irreversible)</span></div>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelImportModal">Cancel</button>
+        <button class="btn-primary" id="confirmImport">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

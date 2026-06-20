@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "StudyFlow Tracker",
+  "version": "2.0.0",
+  "description": "Your personal study planner with calendar, goals & domain tracking",
+  "icons": { "48": "icons/icon48.png", "96": "icons/icon96.png" },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": { "48": "icons/icon48.png" },
+    "default_title": "StudyFlow Tracker"
+  },
+  "background": { "scripts": ["background/background.js"], "type": "module" },
+  "permissions": ["storage", "alarms", "notifications", "unlimitedStorage", "tabs"],
+  "browser_specific_settings": {
+    "gecko": { "id": "studyflow@tracker.dev", "strict_min_version": "109.0" }
+  }
+}
