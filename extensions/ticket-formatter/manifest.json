@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "DFM Quick Notes",
+  "version": "1.0",
+  "permissions": [
+    "contextMenus",
+    "scripting",
+    "activeTab",
+    "clipboardWrite",
+    "offscreen"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

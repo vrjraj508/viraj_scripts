@@ -16,9 +16,9 @@ $profiles = @{
 # ================================================
 $dbProfiles = @{
     "1" = @{ Name = "PostgreSQL";     Dep = "postgresql"; Driver = "org.postgresql.Driver";    Dialect = "org.hibernate.dialect.PostgreSQLDialect" }
-    "2" = @{ Name = "MySQL";          Dep = "mysql";       Driver = "com.mysql.cj.jdbc.Driver"; Dialect = "org.hibernate.dialect.MySQLDialect" }
-    "3" = @{ Name = "H2 (In-Memory)"; Dep = "h2";          Driver = "org.h2.Driver";            Dialect = "org.hibernate.dialect.H2Dialect" }
-    "4" = @{ Name = "No Database";    Dep = "";            Driver = "";                         Dialect = "" }
+    "2" = @{ Name = "MySQL";          Dep = "mysql";      Driver = "com.mysql.cj.jdbc.Driver"; Dialect = "org.hibernate.dialect.MySQLDialect" }
+    "3" = @{ Name = "H2 (In-Memory)"; Dep = "h2";         Driver = "org.h2.Driver";            Dialect = "org.hibernate.dialect.H2Dialect" }
+    "4" = @{ Name = "No Database";    Dep = "";           Driver = "";                         Dialect = "" }
 }
 
 # ================================================
@@ -129,8 +129,8 @@ $encodedDeps = $allDeps.Replace(",", "%2C")
 $initUrl = "https://start.spring.io/starter.zip" +
     "?type=maven-project&language=java&javaVersion=21&bootVersion=3.5.0" +
     "&groupId=$groupId" +
-    "&artifactId=$projectName-backend" +
-    "&name=$projectName-backend" +
+    "&artifactId=${projectName}-backend" +
+    "&name=${projectName}-backend" +
     "&packageName=$groupId" +
     "&dependencies=$encodedDeps"
 
@@ -202,7 +202,7 @@ $yml = [System.Collections.Generic.List[string]]::new()
 
 $yml.Add("spring:")
 $yml.Add("  application:")
-$yml.Add("    name: $projectName-backend")
+$yml.Add("    name: ${projectName}-backend")
 $yml.Add("")
 
 # --- Database ---
@@ -276,7 +276,7 @@ if ($allDeps -like "*kafka*") {
     $yml.Add("      key-serializer: org.apache.kafka.common.serialization.StringSerializer")
     $yml.Add("      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer")
     $yml.Add("    consumer:")
-    $yml.Add("      group-id: $projectName-group")
+    $yml.Add("      group-id: ${projectName}-group")
     $yml.Add("      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer")
     $yml.Add("      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer")
     $yml.Add("      auto-offset-reset: earliest")
@@ -301,7 +301,7 @@ if ($allDeps -like "*security*") {
     $yml.Add("    oauth2:")
     $yml.Add("      resourceserver:")
     $yml.Add("        jwt:")
-    $yml.Add("          issuer-uri: http://localhost:8180/realms/$projectName-realm")
+    $yml.Add("          issuer-uri: http://localhost:8180/realms/${projectName}-realm")
 }
 
 $yml.Add("")
@@ -372,10 +372,10 @@ if ($hasNode) {
     Write-Host "  Node $nodeVer found. Scaffolding with Vite..." -ForegroundColor Cyan
     Push-Location $rootDir
     try {
-        echo "y" | npm create vite@latest "$projectName-frontend" -- --template react
+        echo "y" | npm create vite@latest "${projectName}-frontend" -- --template react
         Write-Host "  Vite scaffold done." -ForegroundColor Green
         Write-Host "  Running npm install inside frontend..." -ForegroundColor Cyan
-        Set-Location "$rootDir\$projectName-frontend"
+        Set-Location "$rootDir\${projectName}-frontend"
         npm install
         Write-Host "  npm install done." -ForegroundColor Green
     } catch {
@@ -384,7 +384,7 @@ if ($hasNode) {
     }
     Pop-Location
 } else {
-    Write-Host "  Node.js not found — creating folder structure only." -ForegroundColor Yellow
+    Write-Host "  Node.js not found - creating folder structure only." -ForegroundColor Yellow
 }
 
 # ================================================
@@ -446,6 +446,7 @@ export default defineConfig({
     $fallback = "import { defineConfig } from 'vite'`nexport default defineConfig({ server: { port: $frontendPort } })"
     Set-Content -Path $viteConfigFile -Value $fallback -Encoding UTF8
 }
+
 # .env
 Write-TextFile -FilePath "$frontendDir\.env" -Lines @(
     "VITE_API_BASE_URL=http://localhost:$backendPort/api",
@@ -486,7 +487,7 @@ Write-TextFile -FilePath "$frontendDir\src\utils\constants.js" -Lines @(
 if (-not $hasNode) {
     Write-TextFile -FilePath "$frontendDir\package.json" -Lines @(
         "{",
-        "  `"name`": `"$projectName-frontend`",",
+        "  `"name`": `"${projectName}-frontend`",",
         "  `"version`": `"1.0.0`",",
         "  `"type`": `"module`",",
         "  `"scripts`": {",
@@ -538,17 +539,17 @@ Write-TextFile -FilePath "$rootDir\.gitignore" -Lines @(
 Write-TextFile -FilePath "$rootDir\README.md" -Lines @(
     "# $projectName",
     "",
-    "Full stack — Spring Boot $backendPort + React $frontendPort",
+    "Full stack - Spring Boot $backendPort + React $frontendPort",
     "",
     "## Run Backend",
     "``````bash",
-    "cd $projectName-backend",
+    "cd ${projectName}-backend",
     "mvn spring-boot:run",
     "``````",
     "",
     "## Run Frontend",
     "``````bash",
-    "cd $projectName-frontend",
+    "cd ${projectName}-frontend",
     "npm install",
     "npm run dev",
     "``````",
@@ -572,7 +573,7 @@ Write-Host ""
 Write-Host "  Name      : $projectName" -ForegroundColor White
 Write-Host "  Profile   : $($selectedProfile.Name)" -ForegroundColor White
 if ($dbName -ne "") {
-    Write-Host "  Database  : $($selectedDb.Name) — $dbName" -ForegroundColor White
+    Write-Host "  Database  : $($selectedDb.Name) - $dbName" -ForegroundColor White
 } else {
     Write-Host "  Database  : $($selectedDb.Name)" -ForegroundColor White
 }
@@ -581,13 +582,13 @@ Write-Host "  Frontend  : http://localhost:$frontendPort" -ForegroundColor White
 Write-Host "  Location  : $rootDir" -ForegroundColor White
 Write-Host ""
 Write-Host "  NEXT:" -ForegroundColor Yellow
-Write-Host "  1. IntelliJ opened — let Maven import finish" -ForegroundColor White
+Write-Host "  1. IntelliJ opened - let Maven import finish" -ForegroundColor White
 if ($hasNode) {
-    Write-Host "  2. cd $projectName-frontend" -ForegroundColor White
+    Write-Host "  2. cd ${projectName}-frontend" -ForegroundColor White
     Write-Host "  3. npm run dev" -ForegroundColor White
 } else {
     Write-Host "  2. Install Node.js from https://nodejs.org" -ForegroundColor White
-    Write-Host "  3. cd $projectName-frontend && npm install && npm run dev" -ForegroundColor White
+    Write-Host "  3. cd ${projectName}-frontend && npm install && npm run dev" -ForegroundColor White
 }
 Write-Host ""
 
